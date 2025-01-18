@@ -19,8 +19,9 @@ function internalToRjsf(schemaRoot: SchemaRoot): MixedRjsf {
     };
     const props: Record<string, JSONSchema> = {};
     const uiSchema :UiSchema = {};
+    console.log('SchemaRoot', schemaRoot);
     schemaRoot.fields.map(field => {
-        props[field.id] ={
+        props[field.name] ={
                     type: field.type,
                     title: field.label,
                     description: field.description,
@@ -30,20 +31,22 @@ function internalToRjsf(schemaRoot: SchemaRoot): MixedRjsf {
             }
         if (field.required) {
             schema.required = schema.required || [];
-            schema.required.push(field.id);
+            schema.required.push(field.name);
         };
         if (field.secret) {
-            uiSchema[field.id] = {
+            uiSchema[field.name] = {
                 'ui:widget': 'password'
             };
         }
         if (field.multiline) {
-            uiSchema[field.id] = {
+            uiSchema[field.name] = {
                 'ui:widget': 'textarea'
             };
         }
     });
     schema.properties = props;
+    console.log('Schema', schema);
+    console.log('props', props);
     return {schema, uiSchema} as MixedRjsf;
 }
 function parseUiSchema(schema: JSONSchema) {
