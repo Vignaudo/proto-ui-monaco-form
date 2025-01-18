@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SchemaRoot",
+  "type": "object",
+  "properties": {
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "helpText": {
+            "type": ["string", "null"]
+          },
+          "type": {
+            "type": "string",
+            "default": "string"
+          },
+          "choices": {
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            }
+          },
+          "format": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "defaultValue": {
+            "type": ["string", "null"]
+          },
+          "required": {
+            "type": "boolean",
+            "default": "false"
+          },
+          "secret": {
+            "type": "boolean",
+            "default": "false"
+          },
+          "multiline": {
+            "type": "boolean",
+            "default": "false"
+          }
+        },
+        "required": ["name", "label", "type", "format", "required", "secret", "multiline"]
+      }
+    }
+  },
+  "required": ["fields"]
+}

@@ -1,0 +1,51 @@
+import * as React from 'react';
+
+const icons = {
+  info: <div />,
+  success: <div />,
+  warning: (
+    <div/>
+  ),
+  error: <div />,
+};
+
+export type NotificationProps = {
+  notification: {
+    id: string;
+    type: keyof typeof icons;
+    title: string;
+    message?: string;
+  };
+  onDismiss: (id: string) => void;
+};
+
+export const Notification = ({
+  notification: { id, type, title, message },
+  onDismiss,
+}: NotificationProps) => {
+  return (
+    <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
+      <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5">
+        <div className="p-4" role="alert" aria-label={title}>
+          <div className="flex items-start">
+            <div className="shrink-0">{icons[type]}</div>
+            <div className="ml-3 w-0 flex-1 pt-0.5">
+              <p className="text-sm font-medium text-gray-900">{title}</p>
+              <p className="mt-1 text-sm text-gray-500">{message}</p>
+            </div>
+            <div className="ml-4 flex shrink-0">
+              <button
+                className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                onClick={() => {
+                  onDismiss(id);
+                }}
+              >
+                <span className="sr-only">Close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
