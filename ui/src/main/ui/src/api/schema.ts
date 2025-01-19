@@ -1,13 +1,7 @@
 import axios from 'axios';
 import { JSONSchema } from 'monaco-yaml';
+import { SchemaRoot } from './data';
 
-interface RFC7807Error {
-    type: string;
-    title: string;
-    status: number;
-    detail: string;
-    instance: string;
-}
 const fetchSchema = async () => {
     try {
         const response = await axios.get<string>('/api/schema/schema.json');
@@ -27,25 +21,6 @@ const fetchSchema = async () => {
     }
 };
 
-export interface SchemaRoot {
-    id: string;
-    name: string;
-    fields: Field[];
-}
-interface Field {
-    id: string;
-    name: string;
-    label: string;
-    helpText?: string;
-    type: string;
-    choices?: string[];
-    format: string;
-    description: string;
-    defaultValue?: string;
-    required: boolean;
-    secret: boolean;
-    multiline: boolean;
-}
 export const convertSchema = async (schemaString: string) => {
     try {
         const response = await axios.post<string>('/api/schema/convert', schemaString, {

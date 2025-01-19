@@ -5,30 +5,32 @@ import validator from '@rjsf/validator-ajv8';
 import { JSONSchema } from "monaco-yaml";
 import yaml from 'js-yaml';
 import { RJSFSchema, UiSchema } from "@rjsf/utils";
-import { SchemaRoot } from "@/api";
-import { Alert } from "@mui/material";
+import { Field, formSave, SchemaRoot } from "@/api";
+import { Alert, Button, TextField } from "@mui/material";
+import MainLayout from "@/components/layouts/main";
 
 interface MixedRjsf {
     schema: JSONSchema;
     uiSchema: UiSchema;
 }
+
 function internalToRjsf(schemaRoot: SchemaRoot): MixedRjsf {
     const schema: JSONSchema = {
         type: 'object',
         properties: {}
     };
     const props: Record<string, JSONSchema> = {};
-    const uiSchema :UiSchema = {};
+    const uiSchema: UiSchema = {};
     console.log('SchemaRoot', schemaRoot);
     schemaRoot.fields.map(field => {
-        props[field.name] ={
-                    type: field.type,
-                    title: field.label,
-                    description: field.description,
-                    default: field.defaultValue,
-                    enum: field.choices,
-                    format: field.format,
-            }
+        props[field.name] = {
+            type: field.type,
+            title: field.label,
+            description: field.description,
+            default: field.defaultValue,
+            enum: field.choices,
+            format: field.format,
+        }
         if (field.required) {
             schema.required = schema.required || [];
             schema.required.push(field.name);
@@ -47,8 +49,9 @@ function internalToRjsf(schemaRoot: SchemaRoot): MixedRjsf {
     schema.properties = props;
     console.log('Schema', schema);
     console.log('props', props);
-    return {schema, uiSchema} as MixedRjsf;
+    return { schema, uiSchema } as MixedRjsf;
 }
+
 function parseUiSchema(schema: JSONSchema) {
     const uiSchema: UiSchema = {};
     if (schema.properties) {
@@ -65,11 +68,14 @@ function parseUiSchema(schema: JSONSchema) {
 }
 const EditorPage = () => {
     const [content, setContent] = useState("");
+    const [rawContent, setRawContent] = useState("");
     const [uiSchema, setUiSchema] = useState({});
     const [isValidSchema, setIsValidSchema] = useState(false);
+    const [name, setName] = useState("");
 
     const handleEditorChange = (newValue: string) => {
         setContent(newValue);
+        setRawContent(newValue);
         try {
             console.log('Parsing JSON schema', newValue);
             const parsedContent = yaml.load(newValue) as SchemaRoot;
@@ -88,20 +94,54 @@ const EditorPage = () => {
         }
     };
 
+    const handleSubmit = () => {
+        console.log("Submitted name:", name);
+        console.log("Submitted content:", rawContent);
+        const contentObject = yaml.load(rawContent) as SchemaRoot;
+        const r: SchemaRoot = {
+            name: name,
+            fields: contentObject.fields
+        }
+        console.log('Submitting', r);
+        formSave(r);
+    };
+
     return (
-        <div style={{ display: "flex", height: "100vh" }}>
-            <div style={{ flex: 1, overflow: "hidden" }}>
-                <Editor onChange={handleEditorChange} />
+        <MainLayout>
+            <div style={{ display: "flex", height: "100vh", flexDirection: "column" }}>
+                <div style={{ padding: "10px" }}>
+                    <TextField
+                        label="Enter name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        variant="outlined"
+                        fullWidth
+                        required
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSubmit}
+                        style={{ marginTop: "10px" }}
+                    >
+                        Submit
+                    </Button>
+                </div>
+                <div style={{ display: "flex", flex: 1 }}>
+                    <div style={{ flex: 1, overflow: "hidden" }}>
+                        <Editor onChange={handleEditorChange} />
+                    </div>
+                    <div style={{ flex: 1, padding: "10px", overflowY: "auto" }}>
+                        <h1>Editor Content</h1>
+                        {isValidSchema ? (
+                            <Form schema={yaml.load(content) as RJSFSchema} uiSchema={uiSchema} validator={validator} />
+                        ) : (
+                            <Alert severity="error">Invalid JSON schema</Alert>
+                        )}
+                    </div>
+                </div>
             </div>
-            <div style={{ flex: 1, padding: "10px", overflowY: "auto" }}>
-                <h1>Editor Content</h1>
-                {isValidSchema ? (
-                    <Form schema={yaml.load(content) as RJSFSchema} uiSchema={uiSchema} validator={validator} />
-                ) : (
-                    <Alert severity="error">Invalid JSON schema</Alert>
-                )}
-            </div>
-        </div>
+        </MainLayout>
     );
 };
 
